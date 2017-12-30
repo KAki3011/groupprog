@@ -46,7 +46,7 @@ public Move setMove(int p, int i1, int j1, int i2, int j2)
       p = 1 でplayer2で同様のことをする
       返り値は Move(メソッドは後述)
               フィールドに String way, int distance を持ち way は艦の移動方向(東西南北(今のところ))
-              を表し。　distanceは移動したマスを表す。distance = -1の移動不可であったことを示す
+              を表し。　distanceは移動したマスを表す。distance = -1のとき移動不可であったことを示す
 
 public void printstate(int p)
       p = 0 player1state[][] を表示

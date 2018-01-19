@@ -1,11 +1,361 @@
 import java.util.*;
 import java.io.*;
+import javax.swing.*;
+import java.awt.event.*;
+import java.awt.*;
+//computer
+class ComAction {//computerの次の行動に関する座標を格納した配列を返す
+    public int[] comset(){//初期セット
+	int set[] = new int[6];
+	set[0] = (int)(5 * (Math.random()));
+	set[1] = (int)(5 * (Math.random()));
+	set[2] = (int)(5 * (Math.random()));
+	set[3] = (int)(5 * (Math.random()));
+	set[4] = (int)(5 * (Math.random()));
+	set[5] = (int)(5 * (Math.random()));
+	for(;set[0]==set[2]&&set[1]==set[3];){
+	    set[2] = (int)(5 * (Math.random()));
+	    set[3] = (int)(5 * (Math.random()));
+	}
+	for(;(set[0]==set[4]&&set[1]==set[5])||(set[2]==set[4]&&set[3]==set[5]);){
+	    set[4] = (int)(5 * (Math.random()));
+	    set[5] = (int)(5 * (Math.random()));
+	}
+	return set;
+    }
+    
+    public int[] com(int banmen[][], int banmen2[][]){
+	double r = Math.random();//ランダム変数
+	int data[] = new int[5];//返り値
+	int i, j, k, l;
+	int ban[][] = new int[5][5];//banmen[][]のコピー(comの盤面)
+	int ban2[][] = new int[5][5];//banmen2[][]のコピー(playerの盤面)
+	int gata[] = new int[50];//攻撃の座標を格納(x座標,y座標の順で)
+	int jam2[] = new int[6];//playerの艦の座標の格納
+	int jam[] = new int[6];//移動の際の前の座標の格納(x座標,y座標の順で)
+	int aim[] = new int[18];//移動の際の後の座標の格納(x座標,y座標の順で)
+	double at = 0.5;
+	k = 0;
+	l = 0;
+	
+	for(i=0;i<5;i++)
+	    for(j=0;j<5;j++)
+		ban[i][j] = banmen[i][j];//2次元配列のコピー
+		
+	for(i=0;i<5;i++)
+	    for(j=0;j<5;j++)
+		ban2[i][j] = banmen2[i][j];//2次元配列のコピー
 
+	for(i=0;i<5;i++)//自分の艦の回りに敵がいる場合攻撃の確率を上げる
+	    for(j=0;j<5;j++)
+		if(ban2[i][j]>0){
+		    jam2[k] = i;
+		    jam2[k+1] = j;
+		    k += 2;
+		}
+	for(i=0;i<k;i+=2)
+	    if(ban[jam2[i]][jam2[i+1]]==-1 || ban[jam2[i]][jam2[i+1]]==-3)
+		at += 0.1;
+
+
+	k = 0;
+	l = 0;
+	if(r<at){//攻撃
+	    data[0] = 0;
+
+	    for(i=0;i<5;i++){
+		for(j=0;j<5;j++){
+		    if(ban[i][j]==-1 || ban[i][j]==-3){//攻撃座標の格納
+			gata[k] = i;
+			gata[k+1] = j;
+			k = k + 2;
+		    }
+		}
+	    }
+
+	    r = Math.random();//ランダム
+	    i = (int)(k * r);
+	    if(i%2!=0)i--;
+	    data[1] = gata[i];
+	    data[2] = gata[i+1];
+	    
+	}else{//移動
+	    data[0] = 1;
+
+	    for(i=0;i<5;i++){
+		for(j=0;j<5;j++){
+		    if(ban[i][j]>0){//移動前の座標の格納
+			jam[l] = i;
+			jam[l+1] = j;
+			l = l + 2;
+		    }
+		}
+	    }
+	    r = Math.random();//ランダム
+	    l = (int)(l * r);
+	    if(l%2!=0)l--;
+	    data[1] = jam[l];
+	    data[2] = jam[l+1];
+	    i = jam[l];
+	    j = jam[l+1];
+	    l = 0;
+
+	    //上下左右の座標の格納
+
+	    for(k=0;k<5;k++){
+		if(ban[i][k]==-2||ban[i][k]==-3){
+		    aim[l] = i;
+		    aim[l+1] = k;
+		    l = l + 2;
+		}
+	    }
+	    for(k=0;k<5;k++){
+		if(ban[k][j]==-2||ban[k][j]==-3){
+		    aim[l] = k;
+		    aim[l+1] = j;
+		    l = l + 2;
+		}
+	    }
+	    
+	    //上下左右の格納終了
+	    r = Math.random();//ランダム
+	    l = (int)(l * r);
+	    if(l%2!=0)l--;
+	    data[3] = aim[l];
+	    data[4] = aim[l+1];
+	    
+	}
+	return data;
+    }
+}
+
+//VC
+class TotalFrame extends JFrame {
+    static Gamestate gs;
+    static int flag = 0;
+	static int move=0;
+	static int movex=0;
+	static int movey=0;
+    static int[][] St = new int[5][5];
+    static SeaButton[][] SB = new SeaButton[5][5];
+    JPanel board = new JPanel();
+    JPanel textboard = new JPanel();
+    static JLabel txt = new JLabel("Textbox");
+    static JLabel txt2 = new JLabel("Textbox");
+    static JLabel txt3 = new JLabel("Textbox");
+    static JLabel txt4 = new JLabel("Textbox");
+    static JLabel txt5 = new JLabel("Textbox");
+    public TotalFrame(Gamestate gs){
+	this.gs=gs;
+    	this.setSize(500,700);
+    	board.setSize(500,500);
+    	this.add(board, BorderLayout.NORTH);
+    	this.add(textboard, BorderLayout.SOUTH);
+	this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	textboard.setLayout(new GridLayout(5,1));
+	textboard.add(txt5);
+	textboard.add(txt4);
+	textboard.add(txt3);
+	textboard.add(txt2);
+	textboard.add(txt);
+	board.setLayout(new GridLayout(5,5));
+	int i=0;
+	int j=0;
+	while(i<5){
+	    j=0;
+	    while(j<5){
+	    	SB[i][j]=new SeaButton(i, j);
+		board.add(SB[i][j]);
+		j++;
+	    }
+	    i++;
+	}
+	txt.setFont(new Font("Ariel", Font.BOLD,40));
+	txt2.setFont(new Font("Ariel", Font.BOLD,40));
+	txt3.setFont(new Font("Ariel", Font.BOLD,40));
+	txt4.setFont(new Font("Ariel", Font.BOLD,40));
+	txt5.setFont(new Font("Ariel", Font.BOLD,40));
+	this.setVisible(true);
+    }
+    public static void setflag(int i){
+	flag = i;
+    }
+    public static int getflag(){
+	return flag;
+    }
+    
+    public static int PP(int x,int y){
+	return St[x][y];
+    }
+    public static void St(String s){
+    	String f=txt.getText();
+    	Stlog1(f);
+    	txt.setText(s);
+    }
+    public static void Stlog1(String s){
+    	String f=txt2.getText();
+    	Stlog2(f);
+    	txt2.setText(s);
+    }
+    public static void Stlog2(String s){
+    	String f=txt3.getText();
+    	Stlog3(f);
+    	txt3.setText(s);
+    }
+    public static void Stlog3(String s){
+    	String f=txt4.getText();
+    	Stlog4(f);
+    	txt4.setText(s);
+    }
+    public static void Stlog4(String s){
+    	txt5.setText(s);
+    }
+    public static void Repaint(){
+	int i=0;
+	int j=0;
+	St=gs.getstate(0);
+	while(i<5){
+	    while(j<5){
+		    SB[i][j].Awake();
+		j++;
+	    }
+	    j=0;
+	    i++;
+	}
+    }
+	public static int CheckMove() {
+		return move;
+	}
+	public static int GetMovex() {
+		return movex;
+	}
+	public static int GetMovey() {
+		return movey;
+	}
+	public static void SetMove(int m) {
+		move=m;
+	}
+	public static void SetMove_x(int x) {
+		movex=x;
+	}
+	public static void SetMove_y(int y) {
+		movey=y;
+	}
+}
+
+class SeaButton extends JPanel implements ActionListener{
+   JButton b=new JButton(" ");
+   int x;
+   int y;
+    int q=0;
+    ImageIcon icon;
+   public SeaButton(int i, int j){
+		b.setFont(new Font("Ariel", Font.BOLD,40));
+	x=i;
+	y=j;
+	this.setLayout(new GridLayout(1,1));
+	b.addActionListener(this);
+	this.add(b);
+   }
+   public void actionPerformed(ActionEvent e){
+       if(TotalFrame.getflag() > 0){
+	   TotalFrame.St("Enemy Turn");
+       }else{
+	   TotalFrame.PP(x, y);
+     	TotalFrame.St("("+String.valueOf(x)+","+String.valueOf(y)+")"+"was pushed.");
+	   //modelへの干渉->
+        if(TotalFrame.gs.p1ships < 3){
+        	TotalFrame.gs.setPosition(0,x,y);
+         	TotalFrame.St("艦を配置しました");
+		//TotalFrame.setflag(1);
+          }else if(TotalFrame.CheckMove()==1){
+	    if(TotalFrame.GetMovex()==x || TotalFrame.GetMovey()==y){
+   		   TotalFrame.St("Move");
+   		   TotalFrame.gs.setMove(0,TotalFrame.GetMovex(),TotalFrame.GetMovey(),x,y);
+	    }else{
+   		   TotalFrame.St("Move straight");
+	    }
+   		   TotalFrame.SetMove(0);
+		   //TotalFrame.setflag(1);
+          }else{
+	   switch (TotalFrame.PP(x,y)){
+	   case 0:
+	   case -2:
+		   TotalFrame.St("Denied");
+		   break;
+	   case -1:
+	   case -3:
+	     	TotalFrame.St("("+String.valueOf(x)+","+String.valueOf(y)+")"+"in Fire.");
+		   int i=TotalFrame.gs.setAttack(0,x,y); 
+		   if(i==2){
+		   TotalFrame.St("Hit!");
+		   }else if(i==1){
+		   TotalFrame.St("Splash!");
+		   }else{
+		   TotalFrame.St("Miss!");
+		   }
+		   //TotalFrame.setflag(1);
+		   break;
+	   default: 
+		   TotalFrame.St("MoveMode");
+		   TotalFrame.SetMove(1);
+		   TotalFrame.SetMove_x(x);
+		   TotalFrame.SetMove_y(y);
+		   
+	   }
+	   }
+	TotalFrame.setflag(1);
+       TotalFrame.Repaint();
+       }
+   }
+   public void SetColor(Color x){
+	   b.setBackground(x);
+   }
+    public void Awake(){
+       int i=TotalFrame.PP(x,y);
+	String s= String.valueOf(i);
+	b.setText(s);
+	    b.setIcon(null);
+	switch (i){
+	case -3:
+		b.setBackground(Color.GREEN);
+		break;
+	case -2:
+		b.setBackground(Color.YELLOW);
+		break;
+	case -1:
+		b.setBackground(Color.RED);
+		break;
+	case 0:
+		b.setBackground(null);
+		break;
+	case 1:
+	    b.setBackground(Color.CYAN);
+	    icon=new ImageIcon("./taraibune.png");
+	    b.setIcon(icon);
+		break;
+	case 2:
+	    b.setBackground(Color.CYAN);
+	    icon=new ImageIcon("./nanpasen.png");
+	    b.setIcon(icon);
+		break;
+	case 3:
+	    b.setBackground(Color.CYAN);
+	    icon=new ImageIcon("./fune.png");
+	    b.setIcon(icon);
+		break;
+	}
+	//System.out.println(i);
+	//GridFrameに押されたボタンの座標送信
+    }
+}
+
+//model
 class Gamestate{
   private int p1state[][];    // player1の盤面情報
   private int p2state[][];    // player2の盤面情報
-  private int p1ships;          // player1の艦の数
-  private int p2ships;          // player2の艦の数
+  int p1ships;          // player1の艦の数
+  int p2ships;          // player2の艦の数
   private int p1position[];   // player1の艦の場所
   private int p2position[];   // player2の艦の場所
   // 艦のセットはオブジェクト生成時には行わない
@@ -525,7 +875,7 @@ class Move{
     way = s;
     distance = d;
   }
-  public int getDistnace(){
+  public int getDistance(){
     return distance;
   }
   public String getWay(){
@@ -533,6 +883,7 @@ class Move{
   }
 }
 
+//main
 public class seabattle{
   public static void main(String args[]){
     int player; // 0:player1
@@ -540,8 +891,13 @@ public class seabattle{
     int[][] test;
     Move move = new Move();
     Gamestate gamestate = new Gamestate();
+    TotalFrame totalframe = new TotalFrame(gamestate);
+    ComAction comaction = new ComAction();
+    int data[] = new int[6];
+    int data2[] = new int[5];
     //-----------------------------------------
     //CUI
+    /*
     Scanner scan;
     String str;
     System.out.println("艦の配置");
@@ -628,9 +984,84 @@ public class seabattle{
       System.out.println("You win");
     }else{
       System.out.println("You lose");
+    }*/
+    
+    //----------------------------------------
+
+    //GUI
+    totalframe.St("艦を配置してください。");
+    totalframe.St("戦艦を配置してください。");
+    while(true){
+	System.out.println(" ");
+	if(totalframe.getflag() == 1){
+
+	    break;
+	}
+    }
+    totalframe.St("巡洋艦を配置してください。");
+    totalframe.setflag(0);
+    while(true){
+	System.out.println(" ");
+	if(totalframe.getflag() == 1){
+	    break;
+	}
+    }
+    totalframe.St("潜水艦を配置してください。");
+    totalframe.setflag(0);
+    while(true){
+	System.out.println(" ");
+	if(totalframe.getflag() == 1){
+	    break;
+	}
+    }
+    //敵艦の配置
+    data = comaction.comset();
+    gamestate.setPosition(1, data[0], data[1]);
+    gamestate.setPosition(1, data[2], data[3]);
+    gamestate.setPosition(1, data[4], data[5]);
+    //一方的に攻撃、移動
+    p1s = gamestate.getships(0);
+    p2s = gamestate.getships(1);
+    while(p1s != 0 && p2s != 0){
+	while(totalframe.getflag() != 1){
+        System.out.println("------------------");
+        gamestate.printstate(2);
+        totalframe.St("あなたの番です。");
+	totalframe.setflag(0);
+            while(true){
+		System.out.println("loop3");  
+	        if(totalframe.getflag() == 1){
+		    System.out.println(" ");
+		    break;
+		}
+	    }
+	}
+      p1s = gamestate.getships(0);
+      p2s = gamestate.getships(1);
+      if(p1s == 0 || p2s == 0){
+	  break;
+      }
+      totalframe.St("相手プレイヤーの番です。");
+      data2 = comaction.com(gamestate.getstate(1), gamestate.getstate(0));
+      if(data2[0] == 0){
+	  gamestate.setAttack(1, data2[1], data2[2]);
+	  totalframe.St("CPUは"+"("+data2[1]+","+data2[2]+")へ攻撃");
+      }else{
+	  move = gamestate.setMove(1, data2[1], data2[2], data2[3], data2[4]);
+	  totalframe.St(move.getWay()+"へ"+move.getDistance()+"マス移動");
+      }
+      p1s = gamestate.getships(0);
+      p2s = gamestate.getships(1);
+      System.out.println("---------------------");
+      totalframe.Repaint();
+      totalframe.setflag(0);
+    }
+    if(p2s == 0){
+      totalframe.St("You win");
+    }else{
+      totalframe.St("You lose");
     }
 
-    //----------------------------------------
     return;
   }
 }

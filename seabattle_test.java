@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.CardLayout;
+import java.awt.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -139,7 +141,7 @@ class ComAction {//computerの次の行動に関する座標を格納した配�
 }
 
 //VC
-class TotalFrame extends JFrame {
+class TotalFrame extends JFrame implements ActionListener{
   static Gamestate gs;
   static int start=3;
   static int flag = 0;
@@ -155,12 +157,30 @@ class TotalFrame extends JFrame {
   static JLabel txt3 = new JLabel("Textbox");
   static JLabel txt4 = new JLabel("Textbox");
   static JLabel txt5 = new JLabel("Textbox");
+  //追加---------------------------------------------------
+  JPanel cardpanel = new JPanel();
+  JPanel gamepanel = new JPanel();
+  JPanel titlep = new JPanel();
+  JPanel thirdp = new JPanel();
+  JLabel gname = new JLabel();
+  JButton startb = new JButton("START");
+  JButton restart = new JButton("REATART");
+  JButton exit = new JButton("EXIT");
+  CardLayout layout = new CardLayout();
+  //-------------------------------------------------------
+
   public TotalFrame(Gamestate gs){
     this.gs=gs;
     this.setSize(500,700);
     board.setSize(500,500);
-    this.add(board, BorderLayout.NORTH);
-    this.add(textboard, BorderLayout.SOUTH);
+    //修正---------------------------
+    this.add(cardpanel);
+    cardpanel.setLayout(layout);
+    cardpanel.setSize(500, 700);
+    gamepanel.setLayout(new BorderLayout());
+    gamepanel.add(board, BorderLayout.NORTH);
+    gamepanel.add(textboard, BorderLayout.SOUTH);
+    //--------------------------------
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     textboard.setLayout(new GridLayout(5,1));
     textboard.add(txt5);
@@ -185,6 +205,31 @@ class TotalFrame extends JFrame {
     txt3.setFont(new Font("Ariel", Font.BOLD,40));
     txt4.setFont(new Font("Ariel", Font.BOLD,40));
     txt5.setFont(new Font("Ariel", Font.BOLD,40));
+    //追加----------------------------------------
+    //titlep.setSize(500, 700);
+    titlep.setLayout(null);
+    gname.setText("海戦ゲーム");
+    startb.setBounds(200, 500, 100, 50);
+    gname.setBounds(0, 200, 500, 100);
+    startb.addActionListener(this);
+    startb.setActionCommand("start");
+    titlep.add(startb);
+    titlep.add(gname);
+
+    //thirdp.setSize(500, 700);
+    thirdp.setLayout(null);
+    restart.setBounds(200, 300, 100, 50);
+    restart.setActionCommand("restart");
+    exit.setBounds(200, 400, 100, 50);
+    exit.setActionCommand("exit");
+    thirdp.add(restart);
+    thirdp.add(exit);
+
+    cardpanel.add(titlep, "title");
+    cardpanel.add(gamepanel, "gamepanel");
+    cardpanel.add(thirdp, "thirdp");
+
+    //--------------------------------------------
     this.setVisible(true);
   }
   public static void setflag(int i){
@@ -258,6 +303,14 @@ class TotalFrame extends JFrame {
     start--;
 
   }
+  //追加----------------------------------------
+  public void actionPerformed(ActionEvent e){
+    String str = e.getActionCommand();
+    if(str.equals("start")){
+      layout.show(cardpanel, "gamepanel");
+    }else if(str.equals("restart"));
+  }
+  //-------------------------------------------
 }
 
 class SeaButton extends JPanel implements ActionListener{
@@ -905,7 +958,7 @@ class Move{
 }
 
 //main
-public class seabattle{
+public class seabattle_test{
   public static void main(String args[]){
     int turn = 0; // 奇数:player1　偶数:player2
     int p1s, p2s, i, j, e = 0, f = 0, f2 = 0, i2, j2;
@@ -969,6 +1022,7 @@ public class seabattle{
     p1s = gamestate.getships(0);
     p2s = gamestate.getships(1);
     if(r > 0.5){
+      System.out.println("自分の番からです " + turn);
       turn++;
     }
 
@@ -1005,7 +1059,7 @@ public class seabattle{
         if(data2[0] == 0){
           gamestate.setAttack(1, data2[1], data2[2]);
           try {
-            Thread.sleep(1200);
+            Thread.sleep(1500);
             totalframe.St("CPUは"+"("+data2[1]+","+data2[2]+")へ攻撃");
           } catch (InterruptedException e1) {
             // TODO 自動生成された catch ブロック
@@ -1014,7 +1068,7 @@ public class seabattle{
         }else{
           move = gamestate.setMove(1, data2[1], data2[2], data2[3], data2[4]);
           try {
-            Thread.sleep(1200);
+            Thread.sleep(1500);
             totalframe.St(move.getWay()+"へ"+move.getDistance()+"マス移動");
           } catch (InterruptedException e1) {
             // TODO 自動生成された catch ブロック
@@ -1053,14 +1107,4 @@ e1.printStackTrace();
 これにより休止を入れ、ループを1秒ごとに回す。ループ文の表示を削除。
 
 eclipseでやったのでpackageついてたり行ずれてたりするよ。
-
-1/27
-while文の中の整理
-相手の挙動も早いとわかりづらいので
-try {
-Thread.sleep(1000);
-} catch (InterruptedException e1) {
-e1.printStackTrace();
-}
-をしようしてゆっくりにした
 */

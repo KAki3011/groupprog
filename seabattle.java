@@ -335,7 +335,7 @@ class SeaButton extends JPanel implements ActionListener{
   public void Awake(){
     int i=TotalFrame.PP(x,y);
     String s= String.valueOf(i);
-    b.setText(s);
+    //b.setText(s);
     b.setIcon(null);
     switch (i){
       case -3:
@@ -613,7 +613,7 @@ class Gamestate{
       if(p2state[i1][j1] > 0 && (p2state[i2][j2] == -2 || p2state[i2][j2] == -3)){
         if(i2-i1 > 0){
           move.set("南", i2-i1);
-        }else if(i1-i2 >= 0){
+        }else if(i1-i2 > 0){
           move.set("北", i1-i2);
         }else if(j2-j1 > 0){
           move.set("東", j2-j1);
@@ -917,9 +917,10 @@ public class seabattle{
     int data[] = new int[6];
     int data2[] = new int[5];
     double r = Math.random();
-    System.out.println(r);
+    //System.out.println(r);
     //-----------------------------------------
     //GUI
+    totalframe.St("ゲームを開始します。");
     totalframe.St("艦を配置してください。");
     totalframe.St("戦艦を配置してください。");
     while(true){
@@ -996,7 +997,7 @@ public class seabattle{
       }else{
         try {
           Thread.sleep(1500);
-          totalframe.St("相手プレイヤーの番です。");
+          totalframe.St("相手の番です。");
         } catch (InterruptedException e1) {
           // TODO 自動生成された catch ブロック
           e1.printStackTrace();
@@ -1006,7 +1007,7 @@ public class seabattle{
           gamestate.setAttack(1, data2[1], data2[2]);
           try {
             Thread.sleep(1200);
-            totalframe.St("CPUは"+"("+data2[1]+","+data2[2]+")へ攻撃");
+            totalframe.St("相手は"+"("+data2[1]+","+data2[2]+")へ攻撃");
           } catch (InterruptedException e1) {
             // TODO 自動生成された catch ブロック
             e1.printStackTrace();
@@ -1015,7 +1016,7 @@ public class seabattle{
           move = gamestate.setMove(1, data2[1], data2[2], data2[3], data2[4]);
           try {
             Thread.sleep(1200);
-            totalframe.St(move.getWay()+"へ"+move.getDistance()+"マス移動");
+            totalframe.St("相手は"+move.getWay()+"へ"+move.getDistance()+"マス移動");
           } catch (InterruptedException e1) {
             // TODO 自動生成された catch ブロック
             e1.printStackTrace();

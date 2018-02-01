@@ -167,6 +167,8 @@ class TotalFrame extends JFrame implements ActionListener{
   JButton restart = new JButton("REATART");
   JButton exit = new JButton("EXIT");
   CardLayout layout = new CardLayout();
+  int off=0;
+  int p = 1;
   //-------------------------------------------------------
 
   public TotalFrame(Gamestate gs){
@@ -208,9 +210,11 @@ class TotalFrame extends JFrame implements ActionListener{
     //追加----------------------------------------
     //titlep.setSize(500, 700);
     titlep.setLayout(null);
+    gname.setFont(new Font("Ariel", Font.BOLD,60));
+    gname.setHorizontalAlignment(JLabel.CENTER);
     gname.setText("海戦ゲーム");
     startb.setBounds(200, 500, 100, 50);
-    gname.setBounds(0, 200, 500, 100);
+    gname.setBounds(0, 0, 500, 100);
     startb.addActionListener(this);
     startb.setActionCommand("start");
     titlep.add(startb);
@@ -308,8 +312,37 @@ class TotalFrame extends JFrame implements ActionListener{
     String str = e.getActionCommand();
     if(str.equals("start")){
       layout.show(cardpanel, "gamepanel");
-    }else if(str.equals("restart"));
+      p = 2;
+    }else if(str.equals("restart")){
+      layout.show(cardpanel, "gamepanel");
+      System.out.println("restart");
+      p = 2;
+    }else if(str.equals("exit")){
+      System.out.println("exit");
+      off = 1;
+      System.exit(0);
+    }
+    return;
   }
+   public void chpanel(String str){
+     if(str.equals("title")){
+       layout.show(cardpanel, "title");
+       p = 1;
+     }else if(str.equals("gamepanel")){
+       layout.show(cardpanel, "gamepanel");
+       p = 2;
+     }else if(str.equals("thirdp")){
+       layout.show(cardpanel, "thirdp");
+       p = 3;
+     }
+     return;
+   }
+   public int getoff(){
+     return off;
+   }
+   public int getp(){
+     return p;
+   }
   //-------------------------------------------
 }
 
@@ -388,7 +421,7 @@ class SeaButton extends JPanel implements ActionListener{
   public void Awake(){
     int i=TotalFrame.PP(x,y);
     String s= String.valueOf(i);
-    b.setText(s);
+    //b.setText(s);
     b.setIcon(null);
     switch (i){
       case -3:
@@ -666,7 +699,7 @@ class Gamestate{
       if(p2state[i1][j1] > 0 && (p2state[i2][j2] == -2 || p2state[i2][j2] == -3)){
         if(i2-i1 > 0){
           move.set("南", i2-i1);
-        }else if(i1-i2 >= 0){
+        }else if(i1-i2 > 0){
           move.set("北", i1-i2);
         }else if(j2-j1 > 0){
           move.set("東", j2-j1);
@@ -919,6 +952,18 @@ class Gamestate{
     }
     return;
   }
+
+  public void gamereset(){
+    reset(p1state);
+    reset(p2state);
+    p1ships = 0;
+    p2ships = 0;
+    for(int i=0; i < 6; i++){
+      p1position[i] = -1;
+      p2position[i] = -1;
+    }
+    return;
+  }
 }
 
 class Move{
@@ -960,7 +1005,7 @@ class Move{
 //main
 public class seabattle_test{
   public static void main(String args[]){
-    int turn = 0; // 奇数:player1　偶数:player2
+    int turn; // 奇数:player1　偶数:player2
     int p1s, p2s, i, j, e = 0, f = 0, f2 = 0, i2, j2;
     int[][] test;
     Move move = new Move();
@@ -969,123 +1014,151 @@ public class seabattle_test{
     ComAction comaction = new ComAction();
     int data[] = new int[6];
     int data2[] = new int[5];
-    double r = Math.random();
-    System.out.println(r);
+    double r;
+    //System.out.println(r);
     //-----------------------------------------
     //GUI
-    totalframe.St("艦を配置してください。");
-    totalframe.St("戦艦を配置してください。");
-    while(true){
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e1) {
-        // TODO 自動生成された catch ブロック
-        e1.printStackTrace();
-      }
-      if(totalframe.getflag() == 1){
+    //while(totalframe.getoff() != 1){
+      r = Math.random();
+      gamestate.gamereset();
+      turn = 0;
 
-        break;
-      }
-    }
-    totalframe.St("巡洋艦を配置してください。");
-    totalframe.setflag(0);
-    while(true){
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e1) {
-        // TODO 自動生成された catch ブロック
-        e1.printStackTrace();
-      }
-      if(totalframe.getflag() == 1){
-        break;
-      }
-    }
-    totalframe.St("潜水艦を配置してください。");
-    totalframe.setflag(0);
-    while(true){
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e1) {
-        // TODO 自動生成された catch ブロック
-        e1.printStackTrace();
-      }
-      if(totalframe.getflag() == 1){
-        break;
-      }
-    }
-    //敵艦の配置
-    data = comaction.comset();
-    gamestate.setPosition(1, data[0], data[1]);
-    gamestate.setPosition(1, data[2], data[3]);
-    gamestate.setPosition(1, data[4], data[5]);
-
-    p1s = gamestate.getships(0);
-    p2s = gamestate.getships(1);
-    if(r > 0.5){
-      System.out.println("自分の番からです " + turn);
-      turn++;
-    }
-
-    while(p1s != 0 && p2s != 0){
-      System.out.println("ターン　"+turn);
-      gamestate.printstate(2);
-      if(turn % 2 == 1){
-        totalframe.setflag(0);
-        while(totalframe.getflag() != 1){
-          totalframe.St("あなたの番です。");
-          totalframe.setflag(0);
-          while(true){
-            try {
-              Thread.sleep(500);
-            } catch (InterruptedException e1) {
-              // TODO 自動生成された catch ブロック
-              e1.printStackTrace();
-            }
-            if(totalframe.getflag() == 1){
-              //System.out.println(" ");
-              break;
-            }
-          }
-        }
-      }else{
+      totalframe.St("ゲームを開始します。");
+      totalframe.St("艦を配置してください。");
+      totalframe.St("戦艦を配置してください。");
+      while(true){
         try {
-          Thread.sleep(1500);
-          totalframe.St("相手プレイヤーの番です。");
+          Thread.sleep(1000);
         } catch (InterruptedException e1) {
           // TODO 自動生成された catch ブロック
           e1.printStackTrace();
         }
-        data2 = comaction.com(gamestate.getstate(1), gamestate.getstate(0));
-        if(data2[0] == 0){
-          gamestate.setAttack(1, data2[1], data2[2]);
-          try {
-            Thread.sleep(1500);
-            totalframe.St("CPUは"+"("+data2[1]+","+data2[2]+")へ攻撃");
-          } catch (InterruptedException e1) {
-            // TODO 自動生成された catch ブロック
-            e1.printStackTrace();
-          }
-        }else{
-          move = gamestate.setMove(1, data2[1], data2[2], data2[3], data2[4]);
-          try {
-            Thread.sleep(1500);
-            totalframe.St(move.getWay()+"へ"+move.getDistance()+"マス移動");
-          } catch (InterruptedException e1) {
-            // TODO 自動生成された catch ブロック
-            e1.printStackTrace();
-          }
+        if(totalframe.getflag() == 1){
+
+          break;
         }
       }
+      totalframe.St("巡洋艦を配置してください。");
+      totalframe.setflag(0);
+      while(true){
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+          // TODO 自動生成された catch ブロック
+          e1.printStackTrace();
+        }
+        if(totalframe.getflag() == 1){
+          break;
+        }
+      }
+      totalframe.St("潜水艦を配置してください。");
+      totalframe.setflag(0);
+      while(true){
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+          // TODO 自動生成された catch ブロック
+          e1.printStackTrace();
+        }
+        if(totalframe.getflag() == 1){
+          break;
+        }
+      }
+      //敵艦の配置
+      data = comaction.comset();
+      gamestate.setPosition(1, data[0], data[1]);
+      gamestate.setPosition(1, data[2], data[3]);
+      gamestate.setPosition(1, data[4], data[5]);
+
       p1s = gamestate.getships(0);
       p2s = gamestate.getships(1);
-      turn++;
-      totalframe.Repaint();
-    }
-    if(p2s == 0){
-      totalframe.St("You win");
-    }else{
-      totalframe.St("You lose");
-    }
+      if(r > 0.5){
+        //System.out.println("自分の番からです " + turn);
+        turn++;
+      }
+
+      while(p1s != 0 && p2s != 0){
+        System.out.println("ターン　"+turn);
+        gamestate.printstate(2);
+        if(turn % 2 == 1){
+          totalframe.setflag(0);
+          while(totalframe.getflag() != 1){
+            totalframe.St("あなたの番です。");
+            totalframe.setflag(0);
+            while(true){
+              try {
+                Thread.sleep(500);
+              } catch (InterruptedException e1) {
+                // TODO 自動生成された catch ブロック
+                e1.printStackTrace();
+              }
+              if(totalframe.getflag() == 1){
+                //System.out.println(" ");
+                break;
+              }
+            }
+          }
+        }else{
+          try {
+            Thread.sleep(1500);
+            totalframe.St("相手の番です。");
+          } catch (InterruptedException e1) {
+            // TODO 自動生成された catch ブロック
+            e1.printStackTrace();
+          }
+          data2 = comaction.com(gamestate.getstate(1), gamestate.getstate(0));
+          if(data2[0] == 0){
+            gamestate.setAttack(1, data2[1], data2[2]);
+            try {
+              Thread.sleep(1200);
+              totalframe.St("相手は"+"("+data2[1]+","+data2[2]+")へ攻撃");
+            } catch (InterruptedException e1) {
+              // TODO 自動生成された catch ブロック
+              e1.printStackTrace();
+            }
+          }else{
+            move = gamestate.setMove(1, data2[1], data2[2], data2[3], data2[4]);
+            try {
+              Thread.sleep(1200);
+              totalframe.St("相手は"+move.getWay()+"へ"+move.getDistance()+"マス移動");
+            } catch (InterruptedException e1) {
+              // TODO 自動生成された catch ブロック
+              e1.printStackTrace();
+            }
+          }
+        }
+        p1s = gamestate.getships(0);
+        p2s = gamestate.getships(1);
+        turn++;
+        totalframe.Repaint();
+      }
+      if(p2s == 0){
+        totalframe.St("You win");
+      }else{
+        totalframe.St("You lose");
+      }
+      /*
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e1) {
+        // TODO 自動生成された catch ブロック
+        e1.printStackTrace();
+      }
+
+      totalframe.chpanel("thirdp");
+      while(true){
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+          // TODO 自動生成された catch ブロック
+          e1.printStackTrace();
+        }
+        if(totalframe.getp() != 2){
+          break;
+        }
+      }
+      */
+    //}
 
     return;
   }

@@ -1,10 +1,19 @@
+/*
+Project Name    : <seabatlle>
+File Name       : <seabattle.java>
+Encoding        : <UTF-8>
+Creation Date   : <2018/2>
+Developer       :Uchimura, Kobayahsi, Sugimoto
+*/
+//必要なクラスライブライをimport
 import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
 
-//computer
+//Computerの動作を実現するクラス
 class ComAction {//computerの次の行動に関する座標を格納した配列を返す
-  public int[] comset(){//初期セット
+  //初期の艦の配置を配列にして返す
+  public int[] comset(){
     int set[] = new int[6];
     set[0] = (int)(5 * (Math.random()));
     set[1] = (int)(5 * (Math.random()));
@@ -22,7 +31,7 @@ class ComAction {//computerの次の行動に関する座標を格納した配�
     }
     return set;
   }
-
+  //艦の次の行動を配列して返す
   public int[] com(int banmen[][], int banmen2[][]){
     double r = Math.random();//ランダム変数
     int data[] = new int[5];//返り値
@@ -128,7 +137,7 @@ class ComAction {//computerの次の行動に関する座標を格納した配�
   }
 }
 
-//VC
+//ユーザーに盤面の情報の表示とユーザーの操作を実現するクラス
 class TotalFrame extends JFrame implements ActionListener{
   static Gamestate gs;
   static int start=3;
@@ -145,25 +154,25 @@ class TotalFrame extends JFrame implements ActionListener{
   static JLabel txt3 = new JLabel("Textbox");
   static JLabel txt4 = new JLabel("Textbox");
   static JLabel txt5 = new JLabel("Textbox");
-  //追加---------------------------------------------------
-  JPanel cardpanel = new JPanel();
-  JPanel gamepanel = new JPanel();
-  JPanel titlep = new JPanel();
-  JPanel thirdp = new JPanel();
-  JLabel gname = new JLabel();
-  JButton startb = new JButton("START");
-  JButton restart = new JButton("REATART");
-  JButton exit = new JButton("EXIT");
-  CardLayout layout = new CardLayout();
-  int off=0;
-  int p = 1;
+  //小林が追加---------------------------------------------------
+  JPanel cardpanel = new JPanel();//このJpanelで画面遷移をコントロール
+  JPanel gamepanel = new JPanel();//ゲーム画面のJpanel
+  JPanel titlep = new JPanel();//タイトル画面のJpanel
+  JPanel thirdp = new JPanel();//ゲーム終了画面のJpanel
+  JLabel gname = new JLabel();//タイトルを表示
+  JButton startb = new JButton("START");//タイトル画面のSTARTボタン
+  JButton restart = new JButton("REATART");//ゲーム終了画面のRESTARTボタン
+  JButton exit = new JButton("EXIT");//ゲーム終了画面のEXITボタン
+  CardLayout layout = new CardLayout();//cardpanelにセットする
+  int off=0;//ゲームが終了するか
+  int p = 1;//今表示しているパネルの識別に用いる
   //-------------------------------------------------------
 
   public TotalFrame(Gamestate gs){
     this.gs=gs;
     this.setSize(500,700);
     board.setSize(500,500);
-    //修正---------------------------
+    //小林が追加---------------------------
     this.add(cardpanel);
     cardpanel.setLayout(layout);
     cardpanel.setSize(500, 700);
@@ -195,8 +204,7 @@ class TotalFrame extends JFrame implements ActionListener{
     txt3.setFont(new Font("Ariel", Font.BOLD,40));
     txt4.setFont(new Font("Ariel", Font.BOLD,40));
     txt5.setFont(new Font("Ariel", Font.BOLD,40));
-    //追加----------------------------------------
-    //titlep.setSize(500, 700);
+    //小林が追加----------------------------------------
     titlep.setLayout(null);
     gname.setFont(new Font("Ariel", Font.BOLD,60));
     gname.setHorizontalAlignment(JLabel.CENTER);
@@ -207,8 +215,6 @@ class TotalFrame extends JFrame implements ActionListener{
     startb.setActionCommand("start");
     titlep.add(startb);
     titlep.add(gname);
-
-    //thirdp.setSize(500, 700);
     thirdp.setLayout(null);
     restart.setBounds(200, 300, 100, 50);
     restart.setActionCommand("restart");
@@ -297,11 +303,12 @@ class TotalFrame extends JFrame implements ActionListener{
     start--;
 
   }
-  //追加----------------------------------------
+  //小林が追加----------------------------------------
+  //start変数に3をセット
   public void setstart(){
     start = 3;
   }
-
+  //START,RESTARTボタンなどのメソッド
   public void actionPerformed(ActionEvent e){
     String str = e.getActionCommand();
     if(str.equals("start")){
@@ -317,6 +324,7 @@ class TotalFrame extends JFrame implements ActionListener{
     }
     return;
   }
+  //画面遷移するメソッド
   public void chpanel(String str){
     if(str.equals("title")){
       layout.show(cardpanel, "title");
@@ -330,15 +338,18 @@ class TotalFrame extends JFrame implements ActionListener{
     }
     return;
   }
+  //off変数を返す
   public int getoff(){
     return off;
   }
+  //今どこのパネルを表示しているかを示すpを返す
   public int getp(){
     return p;
   }
   //-------------------------------------------
 }
 
+//TotalFrameに必要なボタンを実現するクラス
 class SeaButton extends JPanel implements ActionListener{
   JButton b=new JButton(" ");
   int x;
@@ -404,7 +415,6 @@ class SeaButton extends JPanel implements ActionListener{
 
         }
       }
-      //TotalFrame.setflag(1);
       TotalFrame.Repaint();
     }
   }
@@ -450,7 +460,7 @@ class SeaButton extends JPanel implements ActionListener{
   }
 }
 
-//model
+//ゲームの盤面の情報を保持、管理するクラス
 class Gamestate{
   private int p1state[][];    // player1の盤面情報
   private int p2state[][];    // player2の盤面情報
@@ -526,8 +536,8 @@ class Gamestate{
   何もなし  0                  */
   public void setPosition(int p, int i, int j){
     if(p == 0){
-      if(p1ships >= 3){
-        System.out.println("これ以上艦の配置を行えません。");
+      if(p1ships >= 3 || p1state[i][j] > 0){
+        //System.out.println("これ以上艦の配置を行えません。");
       }else{
         if(p1ships == 0){
           // 戦艦のセット
@@ -563,8 +573,8 @@ class Gamestate{
         }
       }
     }else if(p == 1){
-      if(p2ships >= 3){
-        System.out.println("これ以上艦の配置を行えません。");
+      if(p2ships >= 3 || p2state[i][j] > 0){
+        //System.out.println("これ以上艦の配置を行えません。");
       }else{
         if(p2ships == 0){
           // 戦艦のセット
@@ -895,7 +905,7 @@ class Gamestate{
       if(s > 0){
         p1state[p1position[4]][p1position[5]] = s;
       }
-      printstate(0);
+      //printstate(0);
       for(int i = 0; i < 6; i += 2){
         if(p1position[i] > -1){
           setAttackrange(p1state, p1position[i], p1position[i+1]);
@@ -937,6 +947,7 @@ class Gamestate{
     return;
   }
 
+  //盤面情報をリセット
   private void reset(int[][] arr){
     for(int i = 0; i < 5; i++){
       for(int j = 0; j < 5; j++){
@@ -946,6 +957,7 @@ class Gamestate{
     return;
   }
 
+  //ゲームのリセット
   public void gamereset(){
     reset(p1state);
     reset(p2state);
@@ -959,6 +971,7 @@ class Gamestate{
   }
 }
 
+//返り値に用いる補助クラス
 class Move{
   private String way;
   private int distance;
@@ -995,33 +1008,36 @@ class Move{
   }
 }
 
-//main
+//ゲームを実現するmainメソッドのあるクラス
 public class seabattle{
   public static void main(String args[]){
+    //----------------------------------------
     int turn; // 奇数:player1　偶数:player2
-    int p1s, p2s, i, j, e = 0, f = 0, f2 = 0, i2, j2;
-    int[][] test;
-    Move move = new Move();
+    int p1s, p2s;// 両プレイヤーの残りの艦を保存
+    Move move = new Move(); //返り値の保存に用いる
     Gamestate gamestate = new Gamestate();
     TotalFrame totalframe = new TotalFrame(gamestate);
     ComAction comaction = new ComAction();
-    int data[] = new int[6];
-    int data2[] = new int[5];
+    int data[] = new int[6];//ComActionから艦の初期位置を受け取る配列
+    int data2[] = new int[5];//ComActionから、コンピューターの攻撃、移動を受け取る配列
     double r;
     //-----------------------------------------
-    //GUI
     while(totalframe.getoff() != 1){
+      //ゲームのリセット、繰り返しゲームをするため
       r = Math.random();
       gamestate.gamereset();
       totalframe.Repaint();
       totalframe.setstart();
       turn = 0;
-
+      //--------------------------------------
+      //艦の配置-------------------------------
+      //ユーザーの艦の配置
       totalframe.St("ゲームを開始します。");
       totalframe.St("艦を配置してください。");
       totalframe.setflag(0);
       totalframe.St("戦艦を配置してください。");
       while(true){
+        //ループを勝手に抜けないように
         try {
           Thread.sleep(1000);
         } catch (InterruptedException e1) {
@@ -1029,7 +1045,6 @@ public class seabattle{
           e1.printStackTrace();
         }
         if(totalframe.getflag() == 1){
-
           break;
         }
       }
@@ -1064,17 +1079,19 @@ public class seabattle{
       gamestate.setPosition(1, data[0], data[1]);
       gamestate.setPosition(1, data[2], data[3]);
       gamestate.setPosition(1, data[4], data[5]);
-
+      //----------------------------------------------
       p1s = gamestate.getships(0);
       p2s = gamestate.getships(1);
+      //プレイヤー先攻、後攻を決定
       if(r > 0.5){
         //System.out.println("自分の番からです " + turn);
         turn++;
       }
-
+      //各プレイヤーの操作を開始
       while(p1s != 0 && p2s != 0){
-        System.out.println("ターン　"+turn);
-        gamestate.printstate(2);
+        //System.out.println("ターン　"+turn);
+        //gamestate.printstate(2);
+        //ユーザー側の操作
         if(turn % 2 == 1){
           totalframe.setflag(0);
           while(totalframe.getflag() != 1){
@@ -1093,7 +1110,7 @@ public class seabattle{
               }
             }
           }
-        }else{
+        }else{//コンピュータの操作
           try {
             Thread.sleep(750);
             totalframe.St("相手の番です。");
@@ -1127,20 +1144,21 @@ public class seabattle{
         turn++;
         totalframe.Repaint();
       }
+      //どちらのプレイヤーが勝利したか判定
       if(p2s == 0){
         totalframe.St("You win");
       }else{
         totalframe.St("You lose");
       }
-
+      //5秒後に表示するパネルを変更
       try {
         Thread.sleep(5000);
       } catch (InterruptedException e1) {
         // TODO 自動生成された catch ブロック
         e1.printStackTrace();
       }
-
       totalframe.chpanel("thirdp");
+      //リスタートか終了するかをGUIで選択
       while(true){
         try {
           Thread.sleep(1000);
@@ -1157,25 +1175,3 @@ public class seabattle{
   }
 
 }
-
-
-/*
-254, 284行目他　TotalFrameにゲーム開始を判断する変数start、関数Getstart, CountdownStartを導入。
-艦の数で判断していると、自機の数が減ると無限にたらい船が蘇ったため。
-
-290, 293行目他　MoveModeになった時、Moveが失敗したときは相手にターンを回さないよう、setflagの位置を修正。
-同時に、違う列だけでなく自身のマスに移動しようとしたときもMove straightと表示しターンをやり直すようにした。
-
-1014行目他　
-try {
-Thread.sleep(1000);
-} catch (InterruptedException e1) {
-e1.printStackTrace();
-}
-これにより休止を入れ、ループを1秒ごとに回す。ループ文の表示を削除。
-
-eclipseでやったのでpackageついてたり行ずれてたりするよ。
-
-2018/2/21
-リスタート機能実装
-*/
